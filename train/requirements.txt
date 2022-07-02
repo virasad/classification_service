@@ -9,3 +9,5 @@ numpy
 Pillow
 tqdm
 requests
+albumentations
+python-multipart

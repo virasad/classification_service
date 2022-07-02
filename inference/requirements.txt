@@ -9,3 +9,4 @@ numpy
 Pillow
 tqdm
 requests
+python-multipart

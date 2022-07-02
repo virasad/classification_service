@@ -2,6 +2,7 @@ import os
 
 import click
 import flash
+import requests
 import torch
 from flash.image import ImageClassifier
 from torchmetrics import Accuracy, Precision, Recall
@@ -13,7 +14,7 @@ from utils import dataloader, logger
 class ClassificationTrainer:
     def __init__(self, backbone='mobilenet_v2', pre_trained_path=None, epochs=100, batch_size=2,
                  num_dataloader_workers=8, image_width=256, image_height=256,
-                 validation_split=0.2):
+                 validation_split=0.2, response_url=None, extra_kwargs=None):
         self.backbone = backbone
         self.pre_trained_path = pre_trained_path
         self.epochs = epochs
@@ -22,6 +23,8 @@ class ClassificationTrainer:
         self.image_width = image_width
         self.image_height = image_height
         self.validation_split = validation_split
+        self.response_url = response_url
+        self.extra_kwargs = extra_kwargs
 
     def trainer(self, dataset_path, save_name=''):
         datamodule = dataloader.get_dataset_for_flash(dataset_path, self.batch_size,
@@ -51,6 +54,11 @@ class ClassificationTrainer:
         trainer.save_checkpoint(save_path)
         result = trainer.validate(model, datamodule=datamodule)
         result[0]['model_p'] = save_path
+        if self.response_url:
+            # add extra_kwargs to result
+            if self.extra_kwargs:
+                result[0].update(self.extra_kwargs)
+            requests.post(self.response_url, data=result[0])
         return result[0]['model_p']
 
 

@@ -1,10 +1,10 @@
 version: "3.8"
 services:
   inference:
-        # network_mode: host
+    network_mode: host
     container_name: "classification-inference"
     build: "./inference"
-    command: " uvicorn app:app --port 5556 --log-level info"
+    command: " uvicorn main:app --port 5556 --log-level info --reload"
     ports:
         - "5556:5556"
     volumes:
@@ -21,10 +21,10 @@ services:
                     - capabilities: [gpu]
 
   train:
-      # network_mode: host
+    network_mode: host
     container_name: "classification-train"
     build: "./train"
-    command: " uvicorn main:app --port 5554 --log-level info"
+    command: "uvicorn main:app --port 5554 --log-level info --reload"
     ports:
         - "5554:5554"
     volumes:
@@ -32,10 +32,10 @@ services:
         - ./volumes/weights:/weights
         - ./volumes/dataset:/dataset
     environment:
-        - RESPONSE_URL=http://web:8000/api/v1/train/done
+      - RESPONSE_URL=http://web:8000/api/v1/train/done
         - LOGGER_URL=http://127.0.0.1:8000/logger
-        - PORT=5554
         - IS_LOGGER_ON=False
+      - WEIGHTS_DIR=/weights
     deploy:
         resources:
             reservations:

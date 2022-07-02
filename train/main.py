@@ -1,13 +1,9 @@
-import os
 from enum import Enum
 from typing import Optional
 
-import requests
-from fastapi import FastAPI
-from pydantic import BaseModel
+from fastapi import FastAPI, BackgroundTasks
 
 import trainer as tr
-import torch
 
 app = FastAPI()
 
@@ -19,22 +15,9 @@ class ModelName(str, Enum):
     todo2 = 'too2'
 
 
-class ClassificationTrain(BaseModel):
-    dataset_p: str
-    save_name: Optional[str] = ''
-    batch_size: Optional[str] = 4
-    extra_kwargs: Optional[dict] = None
-    num_dataloader_workers: Optional[str] = 8
-    epochs: Optional[str] = 100
-    validation_split: str = 0.2
-    pretrained_path: Optional[str] = None
-    backbone: Optional[ModelName] = ModelName.mobilenet_v2.value
-    image_width: Optional[int] = 256
-    image_height: Optional[int] = 256
-
-
 @app.post("/train/")
 def train(dataset_p: str,
+          background_tasks: BackgroundTasks,
           save_name: Optional[str] = '',
           batch_size: Optional[int] = 4,
           num_dataloader_workers: Optional[int] = 8,
@@ -48,8 +31,8 @@ def train(dataset_p: str,
           extra_kwargs: Optional[dict] = None,
           ):
     try:
-        trainer = tr.ClassificationTrainer(
-            backbone=backbone,
+        background_tasks.add_task(tr.ClassificationTrainer(
+            backbone=backbone.value,
             pre_trained_path=pretrained_path,
             epochs=epochs,
             batch_size=batch_size,
@@ -57,18 +40,18 @@ def train(dataset_p: str,
             image_width=image_width,
             image_height=image_height,
             validation_split=validation_split
-        )
+        ).trainer, dataset_path=dataset_p, save_name=save_name)
 
-        result = trainer.trainer(
-            dataset_path=dataset_p,
-            save_name=save_name)
+        # result = trainer.trainer(
+        #     dataset_path=dataset_p,
+        #     save_name=save_name)
         # release GPU memory
-        del trainer
-        torch.cuda.empty_cache()
-        if response_url:
-            requests.post(response_url,
-                              data={**result, **extra_kwargs, 'save_name': train.save_name + '_model.pt'})
-        return result
+
+        # torch.cuda.empty_cache()
+        # if response_url:
+        #     requests.post(response_url,
+        #                   data={**result, **extra_kwargs, 'save_name': train.save_name + '_model.pt'})
+        # return result
 
     except Exception as e:
         return {"result": "failed", 'error': str(e)}
