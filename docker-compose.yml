@@ -4,7 +4,7 @@ services:
         # network_mode: host
     container_name: "classification-inference"
     build: "./inference"
-    command: "python3 main.py"
+    command: " uvicorn app:app --port 5556 --log-level info"
     ports:
         - "5556:5556"
     volumes:
@@ -24,7 +24,7 @@ services:
       # network_mode: host
     container_name: "classification-train"
     build: "./train"
-    command: "python3 main.py"
+    command: " uvicorn main:app --port 5554 --log-level info"
     ports:
         - "5554:5554"
     volumes:
