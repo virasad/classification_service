@@ -4,40 +4,51 @@ services:
     network_mode: host
     container_name: "classification-inference"
     build: "./inference"
-    command: " uvicorn main:app --port 5556 --log-level info --reload"
+    command: " uvicorn main:app --port 5556 --log-level info"
     ports:
-        - "5556:5556"
+      - "5556:5556"
     volumes:
-        - ./inference:/code
-        - ./volumes/weights:/weights
+      - ./inference:/code
+      - ./volumes/weights:/weights
 
     environment:
-        - PORT=5556
-        - WEIGHTS_DIR=/weights
+      - PORT=5556
+      - WEIGHTS_DIR=/weights
+    #    networks:
+    #      - classification-network
+    ipc: host
+    shm_size: 1024M
     deploy:
-        resources:
-            reservations:
-                devices:
-                    - capabilities: [gpu]
+      resources:
+        reservations:
+          devices:
+            - capabilities: [ gpu ]
 
   train:
     network_mode: host
     container_name: "classification-train"
     build: "./train"
-    command: "uvicorn main:app --port 5554 --log-level info --reload"
+    command: "uvicorn main:app --port 5554 --log-level info"
     ports:
-        - "5554:5554"
+      - "5554:5554"
     volumes:
-        - ./train:/code
-        - ./volumes/weights:/weights
-        - ./volumes/dataset:/dataset
+      - ./train:/code
+      - ./volumes/weights:/weights
+      - ./volumes/dataset:/dataset
     environment:
       - RESPONSE_URL=http://web:8000/api/v1/train/done
         - LOGGER_URL=http://127.0.0.1:8000/logger
         - IS_LOGGER_ON=False
       - WEIGHTS_DIR=/weights
+    ipc: host
+    shm_size: 1024M
+    #    networks:
+    #      - classification-network
     deploy:
-        resources:
-            reservations:
-                devices:
-                    - capabilities: [gpu]
+      resources:
+        reservations:
+          devices:
+            - capabilities: [ gpu ]
+
+#networks:
+#  classification-network:

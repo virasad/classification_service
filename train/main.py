@@ -41,17 +41,7 @@ def train(dataset_p: str,
             image_height=image_height,
             validation_split=validation_split
         ).trainer, dataset_path=dataset_p, save_name=save_name)
-
-        # result = trainer.trainer(
-        #     dataset_path=dataset_p,
-        #     save_name=save_name)
-        # release GPU memory
-
-        # torch.cuda.empty_cache()
-        # if response_url:
-        #     requests.post(response_url,
-        #                   data={**result, **extra_kwargs, 'save_name': train.save_name + '_model.pt'})
-        # return result
+        return {"status": "ok"}
 
     except Exception as e:
         return {"result": "failed", 'error': str(e)}
