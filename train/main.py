@@ -39,7 +39,9 @@ def train(dataset_p: str,
             num_dataloader_workers=num_dataloader_workers,
             image_width=image_width,
             image_height=image_height,
-            validation_split=validation_split
+            validation_split=validation_split,
+            response_url=response_url,
+            extra_kwargs=extra_kwargs
         ).trainer, dataset_path=dataset_p, save_name=save_name)
         return {"status": "ok"}
 
