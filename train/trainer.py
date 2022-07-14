@@ -72,7 +72,7 @@ class ClassificationTrainer:
 @click.option('--image_height', default=128, help='Image height')
 @click.option('--validation_split', default=0.2, help='Validation split')
 @click.option('--backbone', default='mobilenet_v2', help='Backbone')
-@click.option('--pre_trained_path', default=None, help='Path to pre-trained model')
+@click.option('--pretrained_path', default=None, help='Path to pre-trained model')
 def cli(dataset_path, save_name, epochs, batch_size, num_dataloader_workers, image_width, image_height,
         validation_split, backbone, pre_trained_path):
     trainer = ClassificationTrainer(backbone=backbone,
