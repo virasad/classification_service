@@ -28,6 +28,7 @@ def train(dataset_p: str,
           image_width: Optional[int] = 256,
           image_height: Optional[int] = 256,
           response_url: Optional[str] = None,
+          log_url: Optional[str] = None,
           extra_kwargs: Optional[dict] = None,
           ):
     try:
@@ -41,6 +42,7 @@ def train(dataset_p: str,
             image_height=image_height,
             validation_split=validation_split,
             response_url=response_url,
+            log_url=log_url,
             extra_kwargs=extra_kwargs
         ).trainer, dataset_path=dataset_p, save_name=save_name)
         return {"status": "ok"}

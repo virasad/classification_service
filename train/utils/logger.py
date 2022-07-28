@@ -1,9 +1,12 @@
+import requests
 from pytorch_lightning.loggers.base import LightningLoggerBase, rank_zero_experiment
 from pytorch_lightning.utilities.distributed import rank_zero_only
-import requests, json
-import os
+
 
 class ClientLogger(LightningLoggerBase):
+    def __init__(self, log_url=None):
+        self.log_url = log_url
+
     @property
     def name(self):
         return "ClientLogger"
@@ -31,8 +34,8 @@ class ClientLogger(LightningLoggerBase):
         print(f"Logging step: {step}")
         metrics['step'] = step
         print(f"Logging metrics: {metrics}")
-        if os.environ.get('IS_LOGGER_ON') in ('true', 'True', '1'):
-            requests.post(os.environ.get('LOGGER_URL', False), data=json.dumps(metrics))
+        if self.log_url:
+            requests.post(self.log_url, json=metrics)
 
 
     @rank_zero_only

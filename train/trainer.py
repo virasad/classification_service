@@ -14,7 +14,7 @@ from utils import dataloader, logger
 class ClassificationTrainer:
     def __init__(self, backbone='mobilenet_v2', pre_trained_path=None, epochs=100, batch_size=2,
                  num_dataloader_workers=8, image_width=256, image_height=256,
-                 validation_split=0.2, response_url=None, extra_kwargs=None):
+                 validation_split=0.2, response_url=None, log_url=None, extra_kwargs=None):
         self.backbone = backbone
         self.pre_trained_path = pre_trained_path
         self.epochs = epochs
@@ -24,6 +24,7 @@ class ClassificationTrainer:
         self.image_height = image_height
         self.validation_split = validation_split
         self.response_url = response_url
+        self.log_url = log_url
         self.extra_kwargs = extra_kwargs
 
     def trainer(self, dataset_path, save_name=''):
@@ -46,9 +47,7 @@ class ClassificationTrainer:
                                     )
 
         trainer = flash.Trainer(
-            max_epochs=self.epochs, logger=logger.ClientLogger(), gpus=torch.cuda.device_count())
-        trainer = flash.Trainer(
-            max_epochs=self.epochs, gpus=torch.cuda.device_count())
+            max_epochs=self.epochs, logger=logger.ClientLogger(self.log_url), gpus=torch.cuda.device_count())
         trainer.finetune(model, datamodule=datamodule, strategy="no_freeze"),
         save_path = os.path.join(os.environ.get('WEIGHTS_DIR', './weights'), "{}_model.pt".format(save_name))
         trainer.save_checkpoint(save_path)
