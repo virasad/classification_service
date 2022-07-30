@@ -4,8 +4,10 @@ from pytorch_lightning.utilities.distributed import rank_zero_only
 
 
 class ClientLogger(LightningLoggerBase):
-    def __init__(self, log_url=None):
+    def __init__(self, log_url=None, task_id=None, max_epochs=None):
         self.log_url = log_url
+        self.task_id = task_id
+        self.max_epochs = max_epochs
 
     @property
     def name(self):
@@ -30,9 +32,11 @@ class ClientLogger(LightningLoggerBase):
 
     @rank_zero_only
     def log_metrics(self, metrics, step):
-        print(f"Logging metrics: {metrics}")
         print(f"Logging step: {step}")
         metrics['step'] = step
+        metrics['task_id'] = self.task_id
+        if self.max_epochs is not None:
+            metrics['is_finished'] = metrics['epoch'] >= self.max_epochs
         print(f"Logging metrics: {metrics}")
         if self.log_url:
             requests.post(self.log_url, json=metrics)
